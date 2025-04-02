@@ -45,24 +45,24 @@ The program must do the same as the following command:
 ## Authorized functions
 | function | function desc | use I give it |
 |-|-|-|
-| open |-|-|
-| close |-|-|
-| read |-|-|
-| write |-|-|
-| malloc |-|-|
-| free |-|-|
-| perror |-|-|
-| strerror |-|-|
-| access |-|-|
-| dup |-|-|
-| dup2 |-|-|
-| execve |-|-|
-| exit |-|-|
-| fork |-|-|
-| pipe |-|-|
-| unlink |-|-|
-| wait |-|-|
-| waitpid |-|-|
+| open | opens a file |-|
+| close | closes a fd |-|
+| read | reads bytes from a fd |-|
+| write | writes into a fd |-|
+| malloc | allocates memory |-|
+| free | frees memory |-|
+| perror | prints a message and errno in stderror |-|
+| strerror | translates errnum |-|
+| access | checks if the proccess can access a file |-|
+| dup | duplicates an fd into the lowest unused fd |-|
+| dup2 | duplicates an fd into the specified fd |-|
+| execve | executes a program |-|
+| exit | terminates a proccess |-|
+| fork | creates a child proccess |-|
+| pipe | creates a pipe (unidirectional data channel for interprocess communication) |-|
+| unlink | deletes a name from the filesystem |-|
+| wait | makes the current theard wait until one of its children terminates |-|
+| waitpid | makes the current theard wait until a specified child changes its state |-|
 
 ## Helpful resources
 - Heredoc (<<)
