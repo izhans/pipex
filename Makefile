@@ -11,7 +11,7 @@ OBJS = $(SRCS:.c=.o)
 
 #### Rules ####
 # Declares rules
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re debug
 
 # Compiles project
 all: $(NAME)
@@ -40,3 +40,7 @@ fclean: clean
 
 # Cleans all and recompiles project
 re: fclean all
+
+# Compiles project for debugging
+debug: CFLAGS += -g
+debug: all
