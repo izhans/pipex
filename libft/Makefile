@@ -39,6 +39,7 @@ CHAR_OBJS = $(CHAR_SRCS:.c=.o)
 # String
 STRING_FOLDER = string/
 STRING_SRCS = \
+			ft_joinstrs.c \
 			ft_split.c \
 			ft_strchr.c \
 			ft_strdup.c \
