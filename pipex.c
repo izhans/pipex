@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/06 18:49:39 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/06 20:35:17 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,32 +61,31 @@ int	main(int argc, char const *argv[], char *envp[])
 	{
 		close(pipe_fd[0]);
 		int infile = open(argv[1], O_RDONLY);
-		dup2(infile, 0);
+		dup2(infile, STDIN_FILENO);
 		close(infile);
 		
 		printf("cmd1 %s\n", cmd1);
-		dup2(pipe_fd[1], 1);
+		dup2(pipe_fd[1], STDOUT_FILENO);
+		close(pipe_fd[1]);
 		
 		execve(cmd1, splited_cmd1, envp);
-		ft_putstr("end cmd1\n"); // this is never executed
 	}
 	else // parent
 	{
 		close(pipe_fd[1]);
-		int outfile = open(argv[4], O_WRONLY);
-		dup2(outfile, 1);
+		int outfile = open(argv[4], O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
+		dup2(outfile, STDOUT_FILENO);
 		close(outfile);
 
-		dup2(pipe_fd[0], 0);
-
-		printf("waiting\n");
+		dup2(pipe_fd[0], STDIN_FILENO);
 		wait(NULL);
-		printf("end waiting\n");
+
 		printf("cmd2 %s\n", cmd2);
+		close(pipe_fd[0]);
 		execve(cmd2, splited_cmd2, envp);
-		printf("end cmd2\n");
+		wait(NULL);
 	}
-	
+	printf("end\n");
 	return (0);
 }
 
