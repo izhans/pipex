@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/19 18:30:02 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/19 21:31:04 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include "libft/libft.h"
 #include <errno.h>
 #include <fcntl.h>
+
+void	ft_run_cmds(char *cmd1, char *cmd2, char **splited_cmd1, char **splited_cmd2, char **envp, const char *infile_file, const char *outfile_file); // TODO 4 args max
+
 
 char	*ft_find_commmand_route(char const *cmd, char **envp);
 char	**ft_get_path(char *envp[]);
@@ -37,30 +40,42 @@ int	main(int argc, char const *argv[], char *envp[])
 	if (cmd1 == NULL || cmd2 == NULL)
 	{
 		ft_putendl("Command not found");
-		free(splited_cmd1);
-		free(splited_cmd2);
+		ft_free_str_array(splited_cmd1); // TODO free_str_array
+		ft_free_str_array(splited_cmd2);
 		return (0);
 	}
-	if (access(cmd1, X_OK) == -1 || access(cmd1, X_OK) == -1)
+	if (access(cmd1, X_OK) == -1 || access(cmd2, X_OK) == -1)
 	{
 		free(cmd1);
 		free(cmd2);
-		free(splited_cmd1);
-		free(splited_cmd2);
+		ft_free_str_array(splited_cmd1);
+		ft_free_str_array(splited_cmd2);
 		ft_putendl("Not enough permissions");
 		return (0);
 	}
 
+	int pid = fork();
+	if (pid == 0)
+		ft_run_cmds(cmd1, cmd2, splited_cmd1, splited_cmd2, envp, argv[1], argv[4]);
+	else
+		wait(&pid);
+	
+	printf("end\n");
+	return (0);
+}
+
+void	ft_run_cmds(char *cmd1, char *cmd2, char **splited_cmd1, char **splited_cmd2, char **envp, const char *infile_file, const char *outfile_file) // TODO 4 args max
+{
 	int pipe_fd[2];
 	pipe(pipe_fd); // TODO check error
 	
-	int f = fork();
-	if(f == -1)
-		return (1);
-	if (f == 0) // child
+	int pid = fork();
+	if(pid == -1)
+		return ;
+	if (pid == 0) // child
 	{
 		close(pipe_fd[0]);
-		int infile = open(argv[1], O_RDONLY);
+		int infile = open(infile_file, O_RDONLY);
 		dup2(infile, STDIN_FILENO);
 		close(infile);
 		
@@ -73,21 +88,19 @@ int	main(int argc, char const *argv[], char *envp[])
 	else // parent
 	{
 		close(pipe_fd[1]);
-		int outfile = open(argv[4], O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
+		int outfile = open(outfile_file, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
 		dup2(outfile, STDOUT_FILENO);
 		close(outfile);
 
 		dup2(pipe_fd[0], STDIN_FILENO);
-		wait(NULL);
+		wait(&pid);
 
 		printf("cmd2 %s\n", cmd2);
 		close(pipe_fd[0]);
 		execve(cmd2, splited_cmd2, envp);
-		wait(NULL);
 	}
-	printf("end\n");
-	return (0);
 }
+
 
 /**
  * first checks if the cmd exists as a complete route, if so, a copy is returned
