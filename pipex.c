@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/19 21:31:04 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/19 21:44:55 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 #include "libft/libft.h"
 #include <errno.h>
 #include <fcntl.h>
+#include "pipex.h"
 
-void	ft_run_cmds(char *cmd1, char *cmd2, char **splited_cmd1, char **splited_cmd2, char **envp, const char *infile_file, const char *outfile_file); // TODO 4 args max
-
+void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp);
 
 char	*ft_find_commmand_route(char const *cmd, char **envp);
 char	**ft_get_path(char *envp[]);
@@ -35,19 +35,19 @@ int	main(int argc, char const *argv[], char *envp[])
 	char **splited_cmd1 = ft_split(argv[2], ' ');
 	char **splited_cmd2 = ft_split(argv[3], ' ');
 
-	char *cmd1 = ft_find_commmand_route(splited_cmd1[0], envp);
-	char *cmd2 = ft_find_commmand_route(splited_cmd2[0], envp);
-	if (cmd1 == NULL || cmd2 == NULL)
+	char *cmd1_route = ft_find_commmand_route(splited_cmd1[0], envp);
+	char *cmd2_route = ft_find_commmand_route(splited_cmd2[0], envp);
+	if (cmd1_route == NULL || cmd2_route == NULL)
 	{
 		ft_putendl("Command not found");
-		ft_free_str_array(splited_cmd1); // TODO free_str_array
+		ft_free_str_array(splited_cmd1);
 		ft_free_str_array(splited_cmd2);
 		return (0);
 	}
-	if (access(cmd1, X_OK) == -1 || access(cmd2, X_OK) == -1)
+	if (access(cmd1_route, X_OK) == -1 || access(cmd2_route, X_OK) == -1)
 	{
-		free(cmd1);
-		free(cmd2);
+		free(cmd1_route);
+		free(cmd2_route);
 		ft_free_str_array(splited_cmd1);
 		ft_free_str_array(splited_cmd2);
 		ft_putendl("Not enough permissions");
@@ -56,15 +56,19 @@ int	main(int argc, char const *argv[], char *envp[])
 
 	int pid = fork();
 	if (pid == 0)
-		ft_run_cmds(cmd1, cmd2, splited_cmd1, splited_cmd2, envp, argv[1], argv[4]);
+	{
+		t_cmd cmd1 = {cmd1_route, splited_cmd1, argv[1]};
+		t_cmd cmd2 = {cmd2_route, splited_cmd2, argv[4]};
+		ft_run_cmds(cmd1, cmd2, envp);
+	}
 	else
 		wait(&pid);
 	
-	printf("end\n");
+	printf("end main\n");
 	return (0);
 }
 
-void	ft_run_cmds(char *cmd1, char *cmd2, char **splited_cmd1, char **splited_cmd2, char **envp, const char *infile_file, const char *outfile_file) // TODO 4 args max
+void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp)
 {
 	int pipe_fd[2];
 	pipe(pipe_fd); // TODO check error
@@ -75,29 +79,29 @@ void	ft_run_cmds(char *cmd1, char *cmd2, char **splited_cmd1, char **splited_cmd
 	if (pid == 0) // child
 	{
 		close(pipe_fd[0]);
-		int infile = open(infile_file, O_RDONLY);
+		int infile = open(cmd1.filename, O_RDONLY);
 		dup2(infile, STDIN_FILENO);
 		close(infile);
 		
-		printf("cmd1 %s\n", cmd1);
+		printf("cmd1 %s\n", cmd1.route);
 		dup2(pipe_fd[1], STDOUT_FILENO);
 		close(pipe_fd[1]);
 		
-		execve(cmd1, splited_cmd1, envp);
+		execve(cmd1.route, cmd1.args, envp);
 	}
 	else // parent
 	{
 		close(pipe_fd[1]);
-		int outfile = open(outfile_file, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
+		int outfile = open(cmd2.filename, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
 		dup2(outfile, STDOUT_FILENO);
 		close(outfile);
 
 		dup2(pipe_fd[0], STDIN_FILENO);
 		wait(&pid);
 
-		printf("cmd2 %s\n", cmd2);
+		printf("cmd2 %s\n", cmd2.route);
 		close(pipe_fd[0]);
-		execve(cmd2, splited_cmd2, envp);
+		execve(cmd2.route, cmd2.args, envp);
 	}
 }
 
