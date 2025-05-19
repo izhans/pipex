@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/06 20:35:17 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/19 18:30:02 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,9 @@ char	*ft_find_commmand_route(char const *cmd, char **envp)
 	while (path[i])
 	{
 		cmd_parts[0] = path[i];
-		ft_joinstrs(cmd_parts, &cmd_route);
+		cmd_route = ft_joinstrs(cmd_parts);
+		if (cmd_route == NULL) // malloc error inside ft_joinstrs
+			break;
 		if (access(cmd_route, F_OK) == 0)
 			return (ft_free_str_array(path), cmd_route);
 		free(cmd_route);
