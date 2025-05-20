@@ -9,12 +9,12 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/pipex",
-			"args": ["file1", "command1", "command2", "file2"],
+			"args": ["Makefile", "ls", "wc", "out"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
 			"externalConsole": false,
-			"MIMode": "lldb"
+			"MIMode": "gdb",
 		}
 	]
 }

@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 14:00:58 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/20 21:41:57 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,45 +17,37 @@ void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp);
 void	ft_run_cmd1(t_cmd cmd1, int pipe_fd[], char **envp);
 void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid);
 
-int	main(int argc, char const *argv[], char *envp[]) // ? meter envp en t_cmd ?
+// ? meter envp en t_cmd ?
+int	main(int argc, char const *argv[], char *envp[])
 {
-	// TODO check initial errors
+	t_cmd	*cmd1;
+	t_cmd	*cmd2;
+	int		pid;
+	
 	if (argc != 5)
 	{
 		ft_putendl("./pipex infile cmd1 cmd2 outfile");
 		return (0);
 	}
-	char **splited_cmd1 = ft_split(argv[2], ' ');
-	char **splited_cmd2 = ft_split(argv[3], ' ');
-
-	char *cmd1_route = ft_find_commmand_route(splited_cmd1[0], envp);
-	char *cmd2_route = ft_find_commmand_route(splited_cmd2[0], envp);
-	if (cmd1_route == NULL || cmd2_route == NULL)
+	cmd1 = ft_create_cmd(argv[2], argv[1], envp);
+	cmd2 = ft_create_cmd(argv[3], argv[4], envp);
+	if (cmd1 == NULL || cmd2 == NULL) // ! no tienen porque existir los 2 para que se ejecute alguno
 	{
 		ft_putendl("Command not found");
-		ft_free_str_array(splited_cmd1);
-		ft_free_str_array(splited_cmd2);
-		return (0);
-	}
-	if (access(cmd1_route, X_OK) == -1 || access(cmd2_route, X_OK) == -1)
-	{
-		free(cmd1_route);
-		free(cmd2_route);
-		ft_free_str_array(splited_cmd1);
-		ft_free_str_array(splited_cmd2);
-		ft_putendl("Not enough permissions");
+		ft_free_cmd(cmd1);
+		ft_free_cmd(cmd2);
 		return (0);
 	}
 
-	int pid = fork();
+	pid = fork();
 	if (pid == 0)
-	{
-		t_cmd cmd1 = {cmd1_route, splited_cmd1, argv[1]};
-		t_cmd cmd2 = {cmd2_route, splited_cmd2, argv[4]};
-		ft_run_cmds(cmd1, cmd2, envp);
-	}
+		ft_run_cmds(*cmd1, *cmd2, envp);
 	else
 		wait(&pid);
+	
+	// free
+	ft_free_cmd(cmd1);
+	ft_free_cmd(cmd2);
 	
 	printf("end main\n");
 	return (0);
@@ -104,7 +96,7 @@ void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid)
 
 	close(pipe_fd[1]);
 
-	outfile = open(cmd2.filename, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
+	outfile = open(cmd2.filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	dup2(outfile, STDOUT_FILENO);
 	close(outfile);
 

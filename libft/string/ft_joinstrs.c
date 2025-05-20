@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 13:14:56 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/19 18:16:08 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/20 20:47:48 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ char	*ft_joinstrs(char const **strs)
 		}
 		strs++;
 	}
+	str[i] = '\0';
 	return (str);
 }
 

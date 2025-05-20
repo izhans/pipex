@@ -6,7 +6,7 @@ LIBFT_DIR = libft/
 LIBFT = $(addprefix $(LIBFT_DIR), libft.a)
 
 # src
-SRCS =	pipex.c utils.c
+SRCS =	pipex.c utils.c t_cmd_utils.c
 OBJS = $(SRCS:.c=.o)
 
 #### Rules ####

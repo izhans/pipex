@@ -6,44 +6,53 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 08:43:28 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 08:44:54 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/20 21:13:24 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+static int	ft_command_route_exists(char *cmd_route);
 static char	**ft_get_path(char *envp[]);
 static char	*ft_find_path(char *envp[]);
 
 /**
  * @brief checks if the cmd exists as a complete route, if so, a copy is returned
  */
-char	*ft_find_commmand_route(char const *cmd, char **envp)
+char	*ft_find_commmand_route(char *cmd, char **envp)
 {
 	char		**path;
 	int			i;
 	char		*cmd_route;
 	char const	*cmd_parts[] = {NULL, "/", cmd, NULL};
 
-	if (access(cmd, F_OK) == 0)
+	if (ft_command_route_exists(cmd))
 		return (ft_strdup(cmd));
 	path = ft_get_path(envp);
 	if (path == NULL)
-		return (NULL); // ? o exit directamente?
+		return (NULL);
 	i = 0;
 	while (path[i])
 	{
 		cmd_parts[0] = path[i];
 		cmd_route = ft_joinstrs(cmd_parts);
-		if (cmd_route == NULL) // malloc error inside ft_joinstrs
-			break;
-		if (access(cmd_route, F_OK) == 0)
-			return (ft_free_str_array(path), cmd_route);
+		if (ft_command_route_exists(cmd_route))
+		{
+			ft_free_str_array(path);
+			return (cmd_route);
+		}
 		free(cmd_route);
 		i++;
 	}
 	ft_free_str_array(path);
 	return (NULL);
+}
+
+static int	ft_command_route_exists(char *cmd_route)
+{
+	if (cmd_route == NULL)
+		return (0);
+	return (access(cmd_route, F_OK | X_OK) == 0);
 }
 
 static char	**ft_get_path(char *envp[])
