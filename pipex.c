@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 08:46:28 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/20 14:00:58 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 #include "pipex.h"
 
 void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp);
+void	ft_run_cmd1(t_cmd cmd1, int pipe_fd[], char **envp);
+void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid);
 
-int	main(int argc, char const *argv[], char *envp[])
+int	main(int argc, char const *argv[], char *envp[]) // ? meter envp en t_cmd ?
 {
 	// TODO check initial errors
 	if (argc != 5)
@@ -69,29 +71,47 @@ void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp)
 		return ;
 	if (pid == 0) // child
 	{
-		close(pipe_fd[0]);
-		int infile = open(cmd1.filename, O_RDONLY);
-		dup2(infile, STDIN_FILENO);
-		close(infile);
-		
-		printf("cmd1 %s\n", cmd1.route);
-		dup2(pipe_fd[1], STDOUT_FILENO);
-		close(pipe_fd[1]);
-		
-		execve(cmd1.route, cmd1.args, envp);
+		ft_run_cmd1(cmd1, pipe_fd, envp);
 	}
 	else // parent
 	{
-		close(pipe_fd[1]);
-		int outfile = open(cmd2.filename, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
-		dup2(outfile, STDOUT_FILENO);
-		close(outfile);
-
-		dup2(pipe_fd[0], STDIN_FILENO);
-		wait(&pid);
-
-		printf("cmd2 %s\n", cmd2.route);
-		close(pipe_fd[0]);
-		execve(cmd2.route, cmd2.args, envp);
+		ft_run_cmd2(cmd2, pipe_fd, envp, pid);
 	}
+}
+
+// child (cmd1)
+void	ft_run_cmd1(t_cmd cmd1, int pipe_fd[], char **envp)
+{
+	int	infile;
+
+	close(pipe_fd[0]);
+
+	infile = open(cmd1.filename, O_RDONLY);
+	dup2(infile, STDIN_FILENO);
+	close(infile);
+	
+	printf("exec cmd1 %s\n", cmd1.route);
+	dup2(pipe_fd[1], STDOUT_FILENO);
+	close(pipe_fd[1]);
+	
+	execve(cmd1.route, cmd1.args, envp);
+}
+
+// parent (cmd2)
+void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid)
+{
+	int	outfile;
+
+	close(pipe_fd[1]);
+
+	outfile = open(cmd2.filename, O_WRONLY | O_CREAT, 0644); // ! outifle en bash borra el fichero entero?
+	dup2(outfile, STDOUT_FILENO);
+	close(outfile);
+
+	dup2(pipe_fd[0], STDIN_FILENO);
+	wait(&pid);
+	printf("exec cmd2 %s\n", cmd2.route);
+	close(pipe_fd[0]);
+
+	execve(cmd2.route, cmd2.args, envp);
 }
