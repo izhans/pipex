@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 21:41:57 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/22 21:52:51 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp);
 void	ft_run_cmd1(t_cmd cmd1, int pipe_fd[], char **envp);
 void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid);
+void	connect_fds(int pipe_fd[], int used_end, int file);
 
 // ? meter envp en t_cmd ?
 int	main(int argc, char const *argv[], char *envp[])
@@ -32,6 +33,7 @@ int	main(int argc, char const *argv[], char *envp[])
 	cmd1 = ft_create_cmd(argv[2], argv[1], envp);
 	cmd2 = ft_create_cmd(argv[3], argv[4], envp);
 	if (cmd1 == NULL || cmd2 == NULL) // ! no tienen porque existir los 2 para que se ejecute alguno
+	// ? de hecho, es realmente relevante comprobar que no exista un comando aquí?
 	{
 		ft_putendl("Command not found");
 		ft_free_cmd(cmd1);
@@ -62,13 +64,10 @@ void	ft_run_cmds(t_cmd cmd1, t_cmd cmd2, char **envp)
 	if(pid == -1)
 		return ;
 	if (pid == 0) // child
-	{
 		ft_run_cmd1(cmd1, pipe_fd, envp);
-	}
 	else // parent
-	{
 		ft_run_cmd2(cmd2, pipe_fd, envp, pid);
-	}
+	// ! TODO en el caso de que algún comando de error ¿que hago?
 }
 
 // child (cmd1)
@@ -76,15 +75,9 @@ void	ft_run_cmd1(t_cmd cmd1, int pipe_fd[], char **envp)
 {
 	int	infile;
 
-	close(pipe_fd[0]);
-
-	infile = open(cmd1.filename, O_RDONLY);
-	dup2(infile, STDIN_FILENO);
-	close(infile);
-	
+	infile = open(cmd1.filename, O_RDONLY); // TODO check error
 	printf("exec cmd1 %s\n", cmd1.route);
-	dup2(pipe_fd[1], STDOUT_FILENO);
-	close(pipe_fd[1]);
+	connect_fds(pipe_fd, WRITE_END, infile);
 	
 	execve(cmd1.route, cmd1.args, envp);
 }
@@ -94,16 +87,38 @@ void	ft_run_cmd2(t_cmd cmd2, int pipe_fd[], char **envp, int pid)
 {
 	int	outfile;
 
-	close(pipe_fd[1]);
+	outfile = open(cmd2.filename, O_WRONLY | O_CREAT | O_TRUNC, 0644); // TODO check error
 
-	outfile = open(cmd2.filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	dup2(outfile, STDOUT_FILENO);
-	close(outfile);
-
-	dup2(pipe_fd[0], STDIN_FILENO);
+	connect_fds(pipe_fd, READ_END, outfile);
 	wait(&pid);
-	printf("exec cmd2 %s\n", cmd2.route);
-	close(pipe_fd[0]);
+	printf("exec cmd2 %s\n", cmd2.route); // ? por que fd deberia salir?
 
 	execve(cmd2.route, cmd2.args, envp);
+}
+
+/**
+ * @brief dups pipe used end and file fd to std in/out and closes unused fds
+ * Pipe used end case:
+ * 	if pipe_fd[0]: read end -> STDIN (0)
+ * 	if pipe_fd[1]: write end -> STDOUT (1)
+ * File case:
+ * 	if infile -> STDIN
+ * 	if outfile -> STDOUT
+ */
+void connect_fds(int pipe_fd[], int used_end, int file)
+{
+	int	unused_end;
+
+	if (used_end == WRITE_END)
+		unused_end = READ_END;
+	else
+		unused_end = WRITE_END;
+	
+	close(pipe_fd[unused_end]);
+	
+	dup2(file, unused_end);
+	close(file);
+
+	dup2(pipe_fd[used_end], used_end);
+	close(pipe_fd[used_end]);
 }

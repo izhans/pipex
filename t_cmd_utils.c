@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 20:24:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 20:49:30 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/22 12:47:34 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ t_cmd	*ft_create_cmd(const char *args, const char *filename, char **envp)
 	if (cmd->route == NULL)
 	{
 		ft_free_str_array(cmd->args);
+		free(cmd); // ?! si dejo de tener clausula guarda de existencia de comando esto puede ser un posible segfault
 		return (NULL);
 	}
 	cmd->filename = filename;
@@ -35,6 +36,8 @@ t_cmd	*ft_create_cmd(const char *args, const char *filename, char **envp)
 void	ft_free_cmd(t_cmd *cmd)
 {
 	// ? añadir comprobaciones de != NULL antes de hacer free ?
+	if (cmd == NULL)
+		return ;
 	free(cmd->route);
 	ft_free_str_array(cmd->args);
 	free(cmd);
