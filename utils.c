@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 08:43:28 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/20 21:13:24 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/22 22:22:41 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,9 @@ static char	*ft_find_path(char *envp[])
 		envp++;
 	}
 	return (NULL);
+}
+
+void	ft_print_error(char *error_msg)
+{
+	ft_putendl_fd(error_msg, 2);
 }
