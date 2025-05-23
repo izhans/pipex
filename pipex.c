@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/22 23:19:01 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/23 03:25:36 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void	ft_run_cmd2(t_cmd *cmd2, int pipe_fd[], char **envp, int pid)
 		return ft_print_error(MSG_COMMAND_NOT_FOUND);
 	
 	outfile = open(cmd2->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (cmd2->filename == NULL && outfile == -1)
+	if (cmd2->filename != NULL && outfile == -1)
 		return ft_print_error(MSG_ERROR_CREATING_OUTFILE);
 	
 	connect_fds(pipe_fd, READ_END, outfile);

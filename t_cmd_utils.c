@@ -6,13 +6,13 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 20:24:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/22 12:47:34 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/23 03:03:57 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-t_cmd	*ft_create_cmd(const char *args, const char *filename, char **envp)
+t_cmd	*ft_create_cmd(const char *args, char *filename, char **envp)
 {
 	t_cmd	*cmd;
 
@@ -29,7 +29,11 @@ t_cmd	*ft_create_cmd(const char *args, const char *filename, char **envp)
 		free(cmd); // ?! si dejo de tener clausula guarda de existencia de comando esto puede ser un posible segfault
 		return (NULL);
 	}
-	cmd->filename = filename;
+	if (!*filename)
+		cmd->filename = NULL;
+	else
+		cmd->filename = filename;
+	cmd->envp = envp;
 	return (cmd);
 }
 
