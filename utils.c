@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 08:43:28 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/22 22:22:41 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 01:48:57 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ static int	ft_command_route_exists(char *cmd_route)
 {
 	if (cmd_route == NULL)
 		return (0);
-	return (access(cmd_route, F_OK | X_OK) == 0);
+	return (access(cmd_route, F_OK) == 0);
 }
 
 static char	**ft_get_path(char *envp[])

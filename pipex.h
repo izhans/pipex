@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 21:32:32 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/23 02:08:15 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 00:30:19 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <errno.h>
 # include <fcntl.h>
 # include <sys/wait.h>
+# include <stdio.h>
 
 # define WRITE_END STDOUT_FILENO
 # define READ_END STDIN_FILENO
