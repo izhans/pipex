@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 21:32:32 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 00:30:19 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 04:04:01 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,13 @@
 
 # define MSG_EXECUTION_INSTRUCTIONS "./pipex infile cmd1 cmd2 outfile"
 # define MSG_COMMAND_NOT_FOUND "Command not found"
-# define MSG_ERROR_OPENING_INFILE "Error opening infile"
-# define MSG_ERROR_CREATING_OUTFILE "Error creating outfile"
 
 typedef struct cmd
 {
-	char		*route;
-	char		**args;
+	char	*route;
+	char	**args;
 	char	*filename;
-	char		**envp;
+	char	**envp;
 }	t_cmd;
 
 // t_cmd utils
@@ -46,6 +44,6 @@ void	ft_free_cmd(t_cmd *cmd);
 
 // utils
 char	*ft_find_commmand_route(char *cmd, char **envp);
-void	ft_print_error(char *error_msg);
+void	ft_error(t_cmd *cmd, int exit_code);
 
 #endif

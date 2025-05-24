@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 08:43:28 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 01:48:57 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 03:51:22 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 static int	ft_command_route_exists(char *cmd_route);
 static char	**ft_get_path(char *envp[]);
-static char	*ft_find_path(char *envp[]);
 
 /**
  * @brief checks if the cmd exists as a complete route, if so, a copy is returned
@@ -57,27 +56,18 @@ static int	ft_command_route_exists(char *cmd_route)
 
 static char	**ft_get_path(char *envp[])
 {
-	char	*path;
-
-	path = ft_find_path(envp);
-	if (path == NULL)
-		return (NULL);
-	return (ft_split(path + 5, ':'));
-}
-
-// ? subir comportamiento a get_path ?
-static char	*ft_find_path(char *envp[])
-{
 	while (*envp)
 	{
 		if (ft_strncmp("PATH=", *envp, 5) == 0)
-			return (*envp);
+			return (ft_split(*envp + 5, ':'));
 		envp++;
 	}
 	return (NULL);
 }
 
-void	ft_print_error(char *error_msg)
+void	ft_error(t_cmd *cmd, int exit_code)
 {
-	ft_putendl_fd(error_msg, 2);
+	perror("");
+	ft_free_cmd(cmd);
+	exit(exit_code);
 }
