@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 18:36:50 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 20:42:41 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 void	ft_exec_commands(char **argv, char **envp, int pipe_fd[]);
 void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[]);
 int		ft_open_file(t_cmd *cmd, int create);
-void	ft_connect_pipes(int pipe_fd[], int file_fd, int parent);
+int		ft_connect_pipes(int pipe_fd[], int file_fd, int parent);
 void	ft_error(t_cmd *cmd, int exit_code);
 
 int	main(int argc, char *argv[], char *envp[])
@@ -78,7 +78,8 @@ void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
 		ft_putendl_fd(MSG_COMMAND_NOT_FOUND, 2);
 		exit(127);
 	}
-	ft_connect_pipes(pipe_fd, file_fd, parent);
+	if (ft_connect_pipes(pipe_fd, file_fd, parent))
+		ft_error(cmd, 1);
 	execve(cmd->route, cmd->args, cmd->envp);
 	ft_error(cmd, 126);
 }
@@ -102,20 +103,22 @@ int	ft_open_file(t_cmd *cmd, int create)
 /**
  * @brief makes the pipe ends connection between commands
  */
-void	ft_connect_pipes(int pipe_fd[], int file_fd, int parent)
+int	ft_connect_pipes(int pipe_fd[], int file_fd, int parent)
 {
-	// TODO manejar errores
+	int	error;
+
 	if (parent)
 	{
-		dup2(file_fd, STDOUT_FILENO);
-		dup2(pipe_fd[READ_END], STDIN_FILENO);
+		error = (dup2(file_fd, STDOUT_FILENO) == -1
+				|| dup2(pipe_fd[READ_END], STDIN_FILENO) == -1);
 	}
 	else
 	{
-		dup2(file_fd, STDIN_FILENO);
-		dup2(pipe_fd[WRITE_END], STDOUT_FILENO);
+		error = (dup2(file_fd, STDIN_FILENO) == -1
+				|| dup2(pipe_fd[WRITE_END], STDOUT_FILENO) == -1);
 	}
 	close(file_fd);
 	close(pipe_fd[READ_END]);
 	close(pipe_fd[WRITE_END]);
+	return (error);
 }
