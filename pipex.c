@@ -6,18 +6,16 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 20:42:41 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 20:51:05 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-// TODO clean + make functions static
-void	ft_exec_commands(char **argv, char **envp, int pipe_fd[]);
-void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[]);
-int		ft_open_file(t_cmd *cmd, int create);
-int		ft_connect_pipes(int pipe_fd[], int file_fd, int parent);
-void	ft_error(t_cmd *cmd, int exit_code);
+static void	ft_exec_commands(char **argv, char **envp, int pipe_fd[]);
+static void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[]);
+static int	ft_open_file(t_cmd *cmd, int create);
+static int	ft_connect_pipes(int pipe_fd[], int file_fd, int parent);
 
 int	main(int argc, char *argv[], char *envp[])
 {
@@ -35,7 +33,7 @@ int	main(int argc, char *argv[], char *envp[])
  * @brief creates the childs and each of them execs a command
  * @note at the end is necessary to close both pipe_fd ends to avoid a deadlock 
  */
-void	ft_exec_commands(char **argv, char **envp, int pipe_fd[])
+static void	ft_exec_commands(char **argv, char **envp, int pipe_fd[])
 {
 	pid_t	pid;
 	pid_t	pid2;
@@ -66,7 +64,7 @@ void	ft_exec_commands(char **argv, char **envp, int pipe_fd[])
 /**
  * @brief prepares and runs the command
  */
-void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
+static void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
 {
 	int		file_fd;
 
@@ -76,6 +74,7 @@ void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
 	if (cmd->route == NULL)
 	{
 		ft_putendl_fd(MSG_COMMAND_NOT_FOUND, 2);
+		ft_free_cmd(cmd);
 		exit(127);
 	}
 	if (ft_connect_pipes(pipe_fd, file_fd, parent))
@@ -87,7 +86,7 @@ void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
 /**
  * @brief opens or creates the file with the filename given
  */
-int	ft_open_file(t_cmd *cmd, int create)
+static int	ft_open_file(t_cmd *cmd, int create)
 {
 	int	fd;
 
@@ -103,7 +102,7 @@ int	ft_open_file(t_cmd *cmd, int create)
 /**
  * @brief makes the pipe ends connection between commands
  */
-int	ft_connect_pipes(int pipe_fd[], int file_fd, int parent)
+static int	ft_connect_pipes(int pipe_fd[], int file_fd, int parent)
 {
 	int	error;
 
