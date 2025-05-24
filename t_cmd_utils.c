@@ -6,7 +6,7 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 20:24:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 01:51:24 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 18:31:03 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,10 @@ t_cmd	*ft_create_cmd(const char *args, char *filename, char **envp)
 		return (NULL);
 	cmd->args = ft_split(args, ' ');
 	if (cmd->args == NULL)
-		return (NULL);
-	cmd->route = ft_find_commmand_route(cmd->args[0], envp);
-	if (cmd->route == NULL)
-	{
-		ft_free_str_array(cmd->args);
-		free(cmd);
-		return (NULL);
-	}
-	if (!*filename)
-		cmd->filename = NULL;
+		cmd->route = NULL;
 	else
-		cmd->filename = filename;
+		cmd->route = ft_find_commmand_route(cmd->args[0], envp);
+	cmd->filename = filename;
 	cmd->envp = envp;
 	return (cmd);
 }

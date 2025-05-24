@@ -6,12 +6,13 @@
 /*   By: isastre- <isastre-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:17:13 by isastre-          #+#    #+#             */
-/*   Updated: 2025/05/24 04:06:39 by isastre-         ###   ########.fr       */
+/*   Updated: 2025/05/24 18:36:50 by isastre-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+// TODO clean + make functions static
 void	ft_exec_commands(char **argv, char **envp, int pipe_fd[]);
 void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[]);
 int		ft_open_file(t_cmd *cmd, int create);
@@ -70,11 +71,13 @@ void	ft_run_command(t_cmd *cmd, int parent, int pipe_fd[])
 	int		file_fd;
 
 	if (cmd == NULL)
+		ft_error(cmd, 1);
+	file_fd = ft_open_file(cmd, parent);
+	if (cmd->route == NULL)
 	{
 		ft_putendl_fd(MSG_COMMAND_NOT_FOUND, 2);
 		exit(127);
 	}
-	file_fd = ft_open_file(cmd, parent);
 	ft_connect_pipes(pipe_fd, file_fd, parent);
 	execve(cmd->route, cmd->args, cmd->envp);
 	ft_error(cmd, 126);
@@ -87,8 +90,6 @@ int	ft_open_file(t_cmd *cmd, int create)
 {
 	int	fd;
 
-	if (cmd->filename == NULL)
-		return (-1);
 	if (create)
 		fd = open(cmd->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	else
